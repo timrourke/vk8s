@@ -1,0 +1,28 @@
+---
+# Install Docker
+
+- name: Add Docker apt-key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker apt repository
+  apt_repository:
+    repo: 'deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable'
+    state: present
+    update_cache: yes
+
+- name: Install Docker
+  apt:
+    name: docker-ce=18.06.3*
+    state: present
+    cache_valid_time: 3600
+    update_cache: yes
+    force: yes
+
+- name: Install Docker CLI
+  apt:
+    name: docker-ce-cli
+    state: present
+    cache_valid_time: 3600
+    update_cache: yes

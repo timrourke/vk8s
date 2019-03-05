@@ -1,0 +1,28 @@
+---
+- name: Install Kubernetes
+  hosts: all
+  remote_user: root
+  become: yes
+
+  roles:
+    - common
+    - users
+    - vim
+    - docker
+    - kubernetes
+
+- name: Configure Kubernetes master
+  hosts: masters
+  remote_user: root
+  become: yes
+
+  roles:
+    - kubernetes-master
+
+- name: Configure Kubernetes cluster with workers
+  hosts: workers
+  remote_user: root
+  become: yes
+
+  roles:
+    - kubernetes-workers

@@ -1,0 +1,32 @@
+---
+# Configure Kubernetes workers
+
+- name: Allow k8s worker healthcheck
+  ufw:
+    rule: allow
+    port: 10250
+    proto: tcp
+
+- name: Allow Flannel UDP backend
+  ufw:
+    rule: allow
+    port: 8285
+    proto: udp
+
+- name: Allow Flannel vxlan backend
+  ufw:
+    rule: allow
+    port: 8472
+    proto: udp
+
+- name: Allow k8s external service ports
+  ufw:
+    rule: allow
+    port: 30000:32767
+    proto: tcp
+
+- name: Join cluster
+  shell: "{{ lookup('file', 'master_join_command.tmp') }} >> node_joined.txt"
+  args:
+    chdir: $HOME
+    creates: node_joined.txt

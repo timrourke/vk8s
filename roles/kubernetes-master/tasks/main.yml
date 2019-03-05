@@ -1,0 +1,52 @@
+---
+# kubernetes-master node setup
+
+- name: Allow k8s master API traffic
+  ufw:
+    rule: allow
+    port: 6443
+    proto: tcp
+
+- name: Allow etcd traffic
+  ufw:
+    rule: allow
+    port: 2379:2380
+    proto: tcp
+
+- name: Initialize the cluster
+  become: yes
+  shell: "kubeadm init --apiserver-advertise-address=192.168.5.10 --pod-network-cidr=192.168.5.0/24 --service-cidr=192.168.5.0/24 >> cluster_initialized.txt"
+  args:
+    chdir: $HOME
+    creates: cluster_initialized.txt
+
+- name: Create .kube directory
+  become: yes
+  become_user: ubuntu
+  file:
+    path: $HOME/.kube
+    state: directory
+    mode: 0755
+
+- name: Copy admin.conf to user's kube config
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /home/ubuntu/.kube/config
+    remote_src: yes
+    owner: ubuntu
+
+- name: Install Pod network
+  become: yes
+  become_user: ubuntu
+  shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml >> pod_network_setup.txt
+  args:
+    chdir: $HOME
+    creates: pod_network_setup.txt
+
+- name: Get join command
+  shell: kubeadm token create --print-join-command
+  register: join_command_raw
+
+- name: Set join command
+  become: no
+  local_action: copy content="{{ join_command_raw.stdout_lines[0] }}" dest="master_join_command.tmp"
