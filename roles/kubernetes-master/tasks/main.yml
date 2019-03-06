@@ -7,6 +7,18 @@
     port: 6443
     proto: tcp
 
+- name: Allow k8s master API traffic
+  ufw:
+    rule: allow
+    port: 8001
+    proto: tcp
+
+- name: Allow k8s master API traffic
+  ufw:
+    rule: allow
+    port: 8443
+    proto: tcp
+
 - name: Allow etcd traffic
   ufw:
     rule: allow
@@ -15,7 +27,7 @@
 
 - name: Initialize the cluster
   become: yes
-  shell: "kubeadm init --apiserver-advertise-address=192.168.5.10 --pod-network-cidr=192.168.5.0/24 --service-cidr=192.168.5.0/24 >> cluster_initialized.txt"
+  shell: "kubeadm init --apiserver-advertise-address=10.0.5.1 --pod-network-cidr=10.244.0.0/16 >> cluster_initialized.txt"
   args:
     chdir: $HOME
     creates: cluster_initialized.txt
